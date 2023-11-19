@@ -2,9 +2,6 @@
 require_once '../db/connection.php';
 include 'header.php';
 
-
-
-
 //Upload Action
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
       $content_type = $_POST['content_type'];
