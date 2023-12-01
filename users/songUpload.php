@@ -36,8 +36,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
       if ($_FILES["audio"]["error"] == 0 && $_FILES["image"]["error"] == 0) {
 
         // Set file paths and names
-        $image_filename = basename($_FILES["image"]["name"]);
-        $audio_filename = basename($_FILES["audio"]["name"]);
+        // $image_filename = basename($_FILES["image"]["name"]);
+        // $audio_filename = basename($_FILES["audio"]["name"]);
+
+           // Generate random and date-based filenames
+        $currentDateTime = date("YmdHis");
+        $randomNumber = generateRandomString(5);
+    
+        $image_filename = $currentDateTime . "_" . $randomNumber . ".jpg";
+        $audio_filename = $currentDateTime . "_" . $randomNumber . ".mp3";
+
+
         $image_path = "../public/uploads/" . $image_filename;
         $audio_path = "../public/uploads/audio/" . $audio_filename;
     
@@ -53,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
         } else {
                 if (move_uploaded_file($_FILES["image"]["tmp_name"], $image_path) && move_uploaded_file($_FILES["audio"]["tmp_name"], $audio_path)) {
                     $sql="INSERT INTO `songs`(`content_type`, `content_title`, `content_upc`, `content_dor`, `content_gld`, `content_art`, `song_title`, `song_isrc`, `song_language`, `song_gld`, `song_genre`, `song_subgenre`, `song_mood`, `song_description`, `song_singer`, `song_composer`, `song_director`, `song_producer`, `song_starcast`, `song_lyricist`, `song_isExplicit`, `song_file`, `crbt_title_1`, `crbt_time_1`, `crbt_title_2`, `crbt_time_2`, `content_status`, `content_createdAt`, `content_createdBy`, `content_updatedAt`, `content_isDeleted`, `content_deletedAt`, `content_isPremium`, `content_premiumAt`, `content_unicode`) VALUES
-                     ('$content_type','$content_title','$content_upc', '$content_dor', '$content_gld', '$image_filename', '$song_title', '$song_isrc', '$song_language', '$song_gld', '$song_genre', '$song_subgenre', '$song_mood', '$song_description', '$song_singer', '$song_composer', '$song_director', '$song_producer', '$song_starcast', '$song_lyricist', '$song_isExplicit', '$audio_filename', '$crbt_title_1', '$crbt_time_1', '$crbt_title_2', '$crbt_time_2', '$content_status', '$content_createdAt', '$content_createdBy', '$content_updatedAt', '$content_isDeleted', '$content_deletedAt', '$content_isPremium', '$content_premiumAt', '$content_unicode')";
+                     ('$content_type','$content_title','$content_upc', '$content_dor', '$content_gld', '$image_filename', '$song_title', '$song_isrc', '$song_language', '$song_gld', '$song_genre', '$song_subgenre', '$song_mood', '$song_description', '$song_singer', '$song_composer', '$song_director', '$song_producer', '$song_starcast', '$song_lyricist', '$song_isExplicit', '$audio_filename', '$crbt_title_1', '$crbt_time_1', '$crbt_title_2', '$crbt_time_2', '$content_status', 'NOW()', '$content_createdBy', 'NOW()', 'NO', 'NOW()', '$content_isPremium', 'NOW()', '$content_unicode')";
     
                 // Execute the SQL query
                 if ($conn->query($sql) === TRUE) {
@@ -68,10 +77,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
     } else {
         echo "<script>alert('Both audio and image files must be uploaded.')</script>";
     }
-
-
-
-
 }
 
 ?>
