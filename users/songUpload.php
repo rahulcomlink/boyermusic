@@ -33,6 +33,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
 			$content_isPremium = "NO";
 			$content_unicode = generateRandomString(10);
 
+
+      if ($_FILES["audio"]["error"] == 0 && $_FILES["image"]["error"] == 0) {
+
+        // Set file paths and names
+        $image_filename = basename($_FILES["image"]["name"]);
+        $audio_filename = basename($_FILES["audio"]["name"]);
+        $image_path = "../public/uploads/" . $image_filename;
+        $audio_path = "../public/uploads/audio/" . $audio_filename;
+    
+        // Validate file types
+        $allowed_image_types = array("jpg", "jpeg", "png", "gif");
+        $allowed_audio_types = array("mp3", "wav");
+    
+        $imageFileType = strtolower(pathinfo($image_path, PATHINFO_EXTENSION));
+        $audioFileType = strtolower(pathinfo($audio_path, PATHINFO_EXTENSION));
+    
+        if (!in_array($imageFileType, $allowed_image_types) || !in_array($audioFileType, $allowed_audio_types)) {
+            echo "<script>alert('Invalid file type. Only JPG, JPEG, PNG, GIF, MP3, and WAV files are allowed.')</script>";
+        } else {
+                if (move_uploaded_file($_FILES["image"]["tmp_name"], $image_path) && move_uploaded_file($_FILES["audio"]["tmp_name"], $audio_path)) {
+                    $sql = "INSERT INTO songs (
+                    content_type, content_title, content_upc, content_dor, content_gld, 
+                    song_title, song_isrc, song_language, song_gld, song_genre, song_subgenre, 
+                    song_mood, song_description, song_singer, song_composer, song_director, 
+                    song_producer, song_starcast, song_lyricist, song_isExplicit, 
+                    crbt_title_1, crbt_time_1, crbt_title_2, crbt_time_2, 
+                    content_status, content_createdBy, content_isPremium, content_unicode,
+                    image_filename, audio_filename, image_path, audio_path
+                ) VALUES (
+                    '$content_type', '$content_title', '$content_upc', '$content_dor', '$content_gld', 
+                    '$song_title', '$song_isrc', '$song_language', '$song_gld', '$song_genre', '$song_subgenre', 
+                    '$song_mood', '$song_description', '$song_singer', '$song_composer', '$song_director', 
+                    '$song_producer', '$song_starcast', '$song_lyricist', '$song_isExplicit', 
+                    '$crbt_title_1', '$crbt_time_1', '$crbt_title_2', '$crbt_time_2', 
+                    '$content_status', '$content_createdBy', '$content_isPremium', '$content_unicode',
+                    '$image_filename', '$audio_filename', '$image_path', '$audio_path'
+                )";
+    
+                // Execute the SQL query
+                if ($conn->query($sql) === TRUE) {
+                    echo "<script>alert('New record created successfully.')</script>";
+                } else {
+                    echo "<script>alert('Error: " . $conn->error . "')</script>";
+                }
+            } else {
+                echo "<script>alert('Sorry, there was an error moving the uploaded files.')</script>";
+            }
+        }
+    } else {
+        echo "<script>alert('Both audio and image files must be uploaded.')</script>";
+    }
+
+
+
+
 }
 
 ?>
@@ -41,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
 <main class="page-content">
   <!--breadcrumb-->
   <!--end breadcrumb-->
-<form class="row g-3" action="/user/api/songUploadAction" method="post" enctype="multipart/form-data">
+<form class="row g-3" action="" method="post" enctype="multipart/form-data">
 
   <div class="row">
     <div class="col-xl-12 mx-auto">
@@ -65,8 +120,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
                   <span class="input-group-text" id="inputGroupPrepend">
                     <span class="far fa-calendar-alt"></span>
                   </span>
-                  <input type="date" name="content_dor" placeholder="Date of Release" class="form-control" id="" aria-describedby="inputGroupPrepend" required>
-                  <div class="invalid-feedback">Please choose a username.</div>
+									<input type="text" class="form-control datepicker" placeholder="Date of Release" name="content_dor"/> 
+
                 </div>
               </div>
               <div class="col-md-4">
@@ -75,13 +130,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
                   <span class="input-group-text" id="inputGroupPrepend">
                     <span class="far fa-calendar-alt"></span>
                   </span>
-                  <input type="date" class="form-control" id="" name="content_gld" aria-describedby="inputGroupPrepend" required>
+                  <input type="text" class="form-control datepicker" placeholder="Date of Live" name="content_gld" required/> 
+
                   <div class="invalid-feedback">Please choose a username.</div>
                 </div>
               </div>
               <div class="col-md-4">
                 <label for="" class="form-label">Content Type</label>
-                <select class="form-select" id="" name="content_type" required>
+                <select class="single-select" id="" name="content_type" required>
                   <option selected disabled value="">Choose...</option>
                   <option value="Album">Album</option>
                   <option value="Single">Film</option>
@@ -186,7 +242,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
                   <span class="input-group-text" id="inputGroupPrepend">
                     <span class="far fa-calendar-alt"></span>
                   </span>
-                  <input type="date" class="form-control" id="" name="song_gld" aria-describedby="inputGroupPrepend" required>
+                  <input type="date" class="form-control datepicker picker__input" id="" name="song_gld" aria-describedby="inputGroupPrepend" required placeholder="Go Live Date">
                   <div class="invalid-feedback">Please choose a username.</div>
                 </div>
               </div>
@@ -307,10 +363,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
               </div>
               <div class="col-md-4">
                 <label for="" class="form-label">Is Explicit?</label>
-                <select class="form-select" id="" name="song_isExplicit" required>
-                  <option selected disabled value="No">No</option>
-                  <option value="Yes">Yes</option>
+                <select class="single-select" id="" name="song_isExplicit" required>
                   <option value="No">No</option>
+                  <option value="Yes">Yes</option>
                 </select>
                 <div class="invalid-feedback">Please select a valid state.</div>
               </div>
@@ -358,7 +413,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
           </div>
           <br>
           <div class="col" style="text-align:center">
-            <button type="submit" name="sub" class="btn btn-info px-5">Upload Now</button>
+            <button type="submit" name="signupSubmit" class="btn btn-info px-5">Upload Now</button>
           </div>
         </div>
       </div>

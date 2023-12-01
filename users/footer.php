@@ -107,6 +107,12 @@
   <!--app-->
   <script src="<?php echo getUrlAsset() ?>/assets/js/app.js"></script>
   <script src="<?php echo getUrlAsset() ?>/assets/js/index2.js"></script>
+  <script src="../public/assets/plugins/datetimepicker/js/picker.js"></script>
+  <script src="../public/assets/plugins/datetimepicker/js/picker.time.js"></script>
+  <script src="../public/assets/plugins/datetimepicker/js/picker.date.js"></script>
+  <script src="../public/assets/plugins/bootstrap-material-datetimepicker/js/moment.min.js"></script>
+  <script src="../public/assets/plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.min.js"></script>
+  <script src="../public/assets/js/form-date-time-pickes.js"></script>
 
 </body>
 

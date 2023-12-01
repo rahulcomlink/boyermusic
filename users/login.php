@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['loginSubmit'])) {
        <header>
           <nav class="navbar navbar-expand-lg navbar-light bg-white rounded-0 border-bottom">
             <div class="container">
-              <a class="navbar-brand" href="#"><img src="assets/images/brand-logo-2.png" width="140" alt=""/></a>
+              <a class="navbar-brand" href="#"><img src="../public/img/logo.png" width="60" alt="shri boyer music"/></a>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
               </button>
@@ -101,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['loginSubmit'])) {
                 </ul>
                 <div class="d-flex ms-3 gap-3">
                   <a href="authentication-signin-with-header-footer.html" class="btn btn-primary btn-sm px-4 radius-30">Login</a>
-                  <a href="authentication-signup-with-header-footer.html" class="btn btn-white btn-sm px-4 radius-30">Register</a>
+                  <a href="signup.php" class="btn btn-white btn-sm px-4 radius-30">Register</a>
                 </div>
               </div>
             </div>
@@ -115,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['loginSubmit'])) {
             <div class="card rounded-0 overflow-hidden shadow-none border mb-5 mb-lg-0">
               <div class="row g-0">
                 <div class="col-12 order-1 col-xl-8 d-flex align-items-center justify-content-center border-end">
-                  <img src="assets/images/error/auth-img-7.png" class="img-fluid" alt="">
+                  <img src="../public/img/banner.png" width="200" class="img-fluid" alt="">
                 </div>
                 <div class="col-12 col-xl-4 order-xl-2">
                   <div class="card-body p-4 p-sm-5">
