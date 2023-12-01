@@ -66,6 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
     
                 // Execute the SQL query
                 if ($conn->query($sql) === TRUE) {
+                    $platFormQuery = "INSERT INTO `platforms`(`spotify`, `gaana`, `itunes`, `youtube`, `hungama`, `jiosaavn`, `amazon`, `content_unicode`, `platforms_createdAt`, `platforms_updateAt`, `platforms_isDeleted`) VALUES ('PENDING','PENDING','PENDING','PENDING','PENDING','PENDING','PENDING','$content_unicode',NOW(),NOW(),'NO')";
+                    $conn->query($platFormQuery);
                     echo "<script>alert('New record created successfully.')</script>";
                 } else {
                     echo "<script>alert('Error: " . $conn->error . "')</script>";
