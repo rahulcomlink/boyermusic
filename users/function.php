@@ -9,7 +9,7 @@ function generateRandomString($length = 8) {
 }
 
 function getUrlAsset(){
-    $url = "http://localhost/musicapp/public";
+    $url = "http://localhost/boyermusic/public";
     return $url;
 }
 
