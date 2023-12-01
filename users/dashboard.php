@@ -117,6 +117,7 @@ $totalPremiumSongs = getTotalCount($conn, $productionCode, $statusConditionPremi
                   <th style="background-color: #12bf24 !important;">Song Title</th>
                   <th style="background-color: #12bf24 !important;">ISRC</th>
                   <th style="background-color: #12bf24 !important;">Total Income</th>
+                  <th style="background-color: #12bf24 !important;">Status</th>
                   <th style="background-color: #12bf24 !important;">Premium</th>
                   <th style="background-color: #12bf24 !important;">Date</th>
                 </tr>
@@ -126,7 +127,7 @@ $totalPremiumSongs = getTotalCount($conn, $productionCode, $statusConditionPremi
               
 
               <?php
-$premiumSongsSql = "SELECT * FROM songs WHERE content_createdBy = '$productionCode' AND content_status = 'ACTIVE'";
+$premiumSongsSql = "SELECT * FROM songs WHERE content_createdBy = '$productionCode'";
 $premiumSongsResult = $conn->query($premiumSongsSql);
 
 while ($row = $premiumSongsResult->fetch_assoc()) {
@@ -136,7 +137,7 @@ while ($row = $premiumSongsResult->fetch_assoc()) {
     <td>
         <div class="d-flex align-items-center">
             <div class="">
-                <img src="../public/img/logo.png" class="rounded-circle" width="46" height="46" alt="" />
+                <img src="../public/uploads/<?php echo $row['content_art'];?>" class="rounded-circle" width="46" height="46" alt="" />
             </div>
             <div class="ms-2">
                 <h6 class="mb-1 font-14"><?php echo $row['song_title']; ?></h6>
@@ -146,6 +147,10 @@ while ($row = $premiumSongsResult->fetch_assoc()) {
     </td>
     <td><?php echo $row['song_isrc']; ?></td>
     <td>₹0</td>
+    <td>
+            <?php echo $row['content_status']; ?>
+    </td>
+
     <td>
             <?php echo $row['content_isPremium']; ?>
     </td>

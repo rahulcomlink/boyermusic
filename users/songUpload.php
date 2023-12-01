@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
         $randomNumber = generateRandomString(5);
     
         $image_filename = $currentDateTime . "_" . $randomNumber . ".jpg";
-        $audio_filename = $currentDateTime . "_" . $randomNumber . ".mp3";
+        $audio_filename = $currentDateTime . "_" . $randomNumber . ".wav";
 
 
         $image_path = "../public/uploads/" . $image_filename;
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
     
         // Validate file types
         $allowed_image_types = array("jpg", "jpeg", "png", "gif");
-        $allowed_audio_types = array("mp3", "wav");
+        $allowed_audio_types = array("wav");
     
         $imageFileType = strtolower(pathinfo($image_path, PATHINFO_EXTENSION));
         $audioFileType = strtolower(pathinfo($audio_path, PATHINFO_EXTENSION));
@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
         } else {
                 if (move_uploaded_file($_FILES["image"]["tmp_name"], $image_path) && move_uploaded_file($_FILES["audio"]["tmp_name"], $audio_path)) {
                     $sql="INSERT INTO `songs`(`content_type`, `content_title`, `content_upc`, `content_dor`, `content_gld`, `content_art`, `song_title`, `song_isrc`, `song_language`, `song_gld`, `song_genre`, `song_subgenre`, `song_mood`, `song_description`, `song_singer`, `song_composer`, `song_director`, `song_producer`, `song_starcast`, `song_lyricist`, `song_isExplicit`, `song_file`, `crbt_title_1`, `crbt_time_1`, `crbt_title_2`, `crbt_time_2`, `content_status`, `content_createdAt`, `content_createdBy`, `content_updatedAt`, `content_isDeleted`, `content_deletedAt`, `content_isPremium`, `content_premiumAt`, `content_unicode`) VALUES
-                     ('$content_type','$content_title','$content_upc', '$content_dor', '$content_gld', '$image_filename', '$song_title', '$song_isrc', '$song_language', '$song_gld', '$song_genre', '$song_subgenre', '$song_mood', '$song_description', '$song_singer', '$song_composer', '$song_director', '$song_producer', '$song_starcast', '$song_lyricist', '$song_isExplicit', '$audio_filename', '$crbt_title_1', '$crbt_time_1', '$crbt_title_2', '$crbt_time_2', '$content_status', 'NOW()', '$content_createdBy', 'NOW()', 'NO', 'NOW()', '$content_isPremium', 'NOW()', '$content_unicode')";
+                     ('$content_type','$content_title','$content_upc', '$content_dor', '$content_gld', '$image_filename', '$song_title', '$song_isrc', '$song_language', '$song_gld', '$song_genre', '$song_subgenre', '$song_mood', '$song_description', '$song_singer', '$song_composer', '$song_director', '$song_producer', '$song_starcast', '$song_lyricist', '$song_isExplicit', '$audio_filename', '$crbt_title_1', '$crbt_time_1', '$crbt_title_2', '$crbt_time_2', '$content_status', NOW(), '$content_createdBy', NOW(), 'NO', NOW(), '$content_isPremium', NOW(), '$content_unicode')";
     
                 // Execute the SQL query
                 if ($conn->query($sql) === TRUE) {
