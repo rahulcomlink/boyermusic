@@ -33,7 +33,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
 			$content_isPremium = "NO";
 			$content_unicode = generateRandomString(10);
 
-
       if ($_FILES["audio"]["error"] == 0 && $_FILES["image"]["error"] == 0) {
 
         // Set file paths and names
@@ -53,23 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signupSubmit'])) {
             echo "<script>alert('Invalid file type. Only JPG, JPEG, PNG, GIF, MP3, and WAV files are allowed.')</script>";
         } else {
                 if (move_uploaded_file($_FILES["image"]["tmp_name"], $image_path) && move_uploaded_file($_FILES["audio"]["tmp_name"], $audio_path)) {
-                    $sql = "INSERT INTO songs (
-                    content_type, content_title, content_upc, content_dor, content_gld, 
-                    song_title, song_isrc, song_language, song_gld, song_genre, song_subgenre, 
-                    song_mood, song_description, song_singer, song_composer, song_director, 
-                    song_producer, song_starcast, song_lyricist, song_isExplicit, 
-                    crbt_title_1, crbt_time_1, crbt_title_2, crbt_time_2, 
-                    content_status, content_createdBy, content_isPremium, content_unicode,
-                    image_filename, audio_filename, image_path, audio_path
-                ) VALUES (
-                    '$content_type', '$content_title', '$content_upc', '$content_dor', '$content_gld', 
-                    '$song_title', '$song_isrc', '$song_language', '$song_gld', '$song_genre', '$song_subgenre', 
-                    '$song_mood', '$song_description', '$song_singer', '$song_composer', '$song_director', 
-                    '$song_producer', '$song_starcast', '$song_lyricist', '$song_isExplicit', 
-                    '$crbt_title_1', '$crbt_time_1', '$crbt_title_2', '$crbt_time_2', 
-                    '$content_status', '$content_createdBy', '$content_isPremium', '$content_unicode',
-                    '$image_filename', '$audio_filename', '$image_path', '$audio_path'
-                )";
+                    $sql="INSERT INTO `songs`(`content_type`, `content_title`, `content_upc`, `content_dor`, `content_gld`, `content_art`, `song_title`, `song_isrc`, `song_language`, `song_gld`, `song_genre`, `song_subgenre`, `song_mood`, `song_description`, `song_singer`, `song_composer`, `song_director`, `song_producer`, `song_starcast`, `song_lyricist`, `song_isExplicit`, `song_file`, `crbt_title_1`, `crbt_time_1`, `crbt_title_2`, `crbt_time_2`, `content_status`, `content_createdAt`, `content_createdBy`, `content_updatedAt`, `content_isDeleted`, `content_deletedAt`, `content_isPremium`, `content_premiumAt`, `content_unicode`) VALUES
+                     ('$content_type','$content_title','$content_upc', '$content_dor', '$content_gld', '$image_filename', '$song_title', '$song_isrc', '$song_language', '$song_gld', '$song_genre', '$song_subgenre', '$song_mood', '$song_description', '$song_singer', '$song_composer', '$song_director', '$song_producer', '$song_starcast', '$song_lyricist', '$song_isExplicit', '$audio_filename', '$crbt_title_1', '$crbt_time_1', '$crbt_title_2', '$crbt_time_2', '$content_status', '$content_createdAt', '$content_createdBy', '$content_updatedAt', '$content_isDeleted', '$content_deletedAt', '$content_isPremium', '$content_premiumAt', '$content_unicode')";
     
                 // Execute the SQL query
                 if ($conn->query($sql) === TRUE) {
