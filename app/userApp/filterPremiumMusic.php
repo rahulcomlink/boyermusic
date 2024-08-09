@@ -43,10 +43,7 @@ include 'header.php';
 									<tr>                                        
                                         <th>Song Title</th>
                                         <th>Production Name</th>
-										<th style="background-color:#F9F9E0;">Income</th>
-                                        <th style="background-color:#F9F9E0;">Platforms Free</th>
-										<th style="background-color:#E3651D;">Production Income</th>
-										<th style="background-color:#6DB9EF;">Revenue</th>
+										<th style="background-color:#06D001;">Revenue</th>
                                         <th>Month</th>
 									</tr>
 								</thead>
@@ -77,6 +74,8 @@ WHERE
     balance.balance_date >= songs.content_premiumAt
     AND songs.content_isPremium = 'Yes'
     AND balance.balance_date BETWEEN '$startOfMonth' AND '$endOfMonth'
+    AND songs.content_createdBy = '$productionCode'
+
 GROUP BY 
     balance.song_name, songs.song_title, songs.content_isPremium, songs.content_premiumAt, balance.balance_date,balance.original_l2_name;";
 
@@ -101,11 +100,14 @@ if ($spotifyResult->num_rows > 0) {
     <tr>
         <td><?php echo $row['song_name']; ?></td>
         <td><?php echo $row['original_l2_name']; ?></td>
-        <td style="background-color:#F9F9E0; font-weight:700"><?php echo number_format($formattedIncome, 0); ?></td>
-        <td style="background-color:#E3651D; font-weight:700"><?php echo number_format($Percent10, 0);?></td>
-        <td style="background-color:#E3651D; font-weight:700"><?php echo number_format($ProductionIncome, 0);?></td>
-        <td style="background-color:#6DB9EF; font-weight:700"><?php echo number_format($OwnerIncome, 0); ?></td>
-        <td><?php echo $row['balance_date']; ?></td>
+        <td style="background-color:#06D001; font-weight:700"><?php echo number_format($ProductionIncome, 0);?></td>
+        <td style="text-align:center;">
+            <?php
+            $timestamp = strtotime($row['balance_date']); // Convert to Unix timestamp
+            $formattedDate = date('F, Y', $timestamp); // Format as "October, 2023"
+            echo $formattedDate;
+            ?>
+        </td>
     </tr>
 
 <?php

@@ -39,47 +39,76 @@ include 'header.php';
 					<div class="card-body">
 						<div class="table-responsive">
 							<table id="example2" class="table table-striped table-bordered">
-								<thead>
-                                <tr style="background:#263544;color:white;text-align:center;">
-                                        <th>Song Title</th>
-                                        <th>Production Name</th>
-										<th style="background-color:#06D001;">Revenue</th>
-                                        <th>Month</th>
-									</tr>
-								</thead>
-								<tbody>
 
 <?php
-
-
 $userDate = $_GET['userDate']; // Expected format: YYYY-MM
 
 // Calculate the first and last day of the selected month
 $startOfMonth = date('Y-m-01', strtotime($userDate));
 $endOfMonth = date('Y-m-t', strtotime($userDate));
 
+
+
+
+
+
+
+$platformSql = "SELECT DISTINCT platforms_name FROM platforms_name";
+$platformResult = $conn->query($platformSql);
+
+$platforms = [];
+if ($platformResult && $platformResult->num_rows > 0) {
+    while ($row = $platformResult->fetch_assoc()) {
+        $platforms[] = $row['platforms_name'];
+    }
+}
+$platformColumns = [];
+foreach ($platforms as $platform) {
+    $platformColumns[] = "SUM(CASE WHEN balance.platforms_name = '$platform' THEN balance.song_income ELSE 0 END) AS `" . $platform . "_Revenue`";
+}
+
+$platformColumnsSql = implode(', ', $platformColumns);
+
 $spotifySql = "SELECT 
-    balance.original_l2_name,
     balance.song_name,
-    songs.content_isPremium,
-    songs.content_premiumAt,
-    balance.balance_date,
-    SUM(balance.song_income) AS profit
+    balance.original_l2_name,
+    songs.song_title,
+    $platformColumnsSql,
+    SUM(balance.song_income) AS Total_Revenue
 FROM 
     balance
 INNER JOIN 
     songs ON songs.song_isrc = balance.song_isrc
-WHERE
-    (
-        (songs.content_isPremium = 'Yes' AND balance.balance_date < songs.content_premiumAt)
-        OR songs.content_isPremium = 'No'
-    )
+WHERE 
+    balance.balance_date >= songs.content_premiumAt
+    AND songs.content_isPremium = 'Yes'
     AND balance.balance_date BETWEEN '$startOfMonth' AND '$endOfMonth'
     AND songs.content_createdBy = '$productionCode'
-
 GROUP BY 
-    balance.song_name";
+    balance.song_name, 
+    balance.original_l2_name, 
+    songs.song_title;";
 
+
+
+
+
+
+?>
+
+<thead>
+<tr style="background:#263544;color:white;text-align:center;">
+<th>Song Title</th>
+        <th>Production Name</th>
+        <?php foreach ($platforms as $platform): ?>
+            <th><?php echo htmlspecialchars($platform); ?></th>
+        <?php endforeach; ?>
+        <th>Total Revenue</th>
+        <th>Month</th>
+    </tr>
+</thead>
+<tbody>
+<?php
 $spotifyResult = $conn->query($spotifySql);
 if (!$spotifyResult) {
     die("Error in SQL query: " . $conn->error);
@@ -87,26 +116,28 @@ if (!$spotifyResult) {
 
 if ($spotifyResult->num_rows > 0) {
     while ($row = $spotifyResult->fetch_assoc()) {
-        $formattedIncome = $row['profit'];
-        //$incomeAsFloat = floatval($formattedIncome);  // Convert formatted income back to float
-        //Payee Calculation
-        $Percent10 = $formattedIncome * 0.10;
-        $distributedAmount = $formattedIncome - $Percent10;
-        //Production Revenue Calculation
-        $ProductionIncome = $distributedAmount * 0.4;
-        //Owner Income Calculation
-        $OwnerIncome = $distributedAmount * 0.6;
+        // Payee Calculation
+        $totalIncome = $row['Total_Revenue'];
+        $Percent10 = $totalIncome * 0.10;
+        $distributedAmount = $totalIncome - $Percent10;
+        // Production Revenue Calculation
+        $ProductionIncome = $distributedAmount * 0.9;
+        // Owner Income Calculation
+        $OwnerIncome = $distributedAmount * 0.1;
 ?>
 
     <tr>
-        <td><?php echo $row['song_name']; ?></td>
-        <td><?php echo $row['original_l2_name']; ?></td>
-        <td style="background-color:#06D001; font-weight:700;text-align:center;"><?php echo number_format($ProductionIncome, 0);?></td>
+        <td><?php echo htmlspecialchars($row['song_title']); ?></td>
+        <td><?php echo htmlspecialchars($row['original_l2_name']); ?></td>
+        <?php foreach ($platforms as $platform): ?>
+            <td><?php echo number_format($row[$platform . '_Revenue'], 0); ?></td>
+        <?php endforeach; ?>
+        <td style="background-color:#06D001; font-weight:700"><?php echo number_format($ProductionIncome, 0); ?></td>
         <td style="text-align:center;">
             <?php
-            $timestamp = strtotime($row['balance_date']); // Convert to Unix timestamp
+            $timestamp = strtotime($userDate . '-01'); // Convert to Unix timestamp
             $formattedDate = date('F, Y', $timestamp); // Format as "October, 2023"
-            echo $formattedDate;
+            echo htmlspecialchars($formattedDate);
             ?>
         </td>
     </tr>
@@ -114,14 +145,12 @@ if ($spotifyResult->num_rows > 0) {
 <?php
     }
 } else {
-    echo "No results found";
+    echo "<tr><td colspan='" . (count($platforms) + 4) . "'>No results found</td></tr>";
 }
 ?>
+</tbody>
 
 
-									
-									
-								</tbody>
 							</table>
 						</div>
 					</div>

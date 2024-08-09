@@ -139,7 +139,7 @@ foreach ($data as $row) {
   $totalxIncome = (int)$row['Total_Income'];
   $after10PercentDeduction = $totalxIncome * 0.90; // Deduct 10%
   $finalAmount = $after10PercentDeduction * 0.40; // 40% of the remaining amount
-    $dataPoints[] = array('x' => $row['song_name'], 'y' => $finalAmount);
+    $dataPoints[] = array('x' => $row['song_name'], 'y' => number_format($finalAmount, 0));
 }
 $dataScheme = array_column($data, 'song_name');
 $dataAllScheme = json_encode($dataScheme);
@@ -150,7 +150,7 @@ $dataJSON = json_encode(array_column($dataPoints, 'y'));
 
 $dataQuerySong = "SELECT song_name AS songName, SUM(song_income) AS Total_Income 
     FROM balance 
-    WHERE balance_date BETWEEN '$startOfMonth' AND '$endOfMonth'
+    WHERE balance_date AND original_l2_name = '$productionName'
     GROUP BY songName
     ORDER BY Total_Income DESC 
     LIMIT 10
@@ -174,25 +174,68 @@ $songDataJSON = json_encode($songDataPoints);
 
 
 
-$balanceQuery = "SELECT balance_date, SUM(song_income) AS Total_Income FROM balance GROUP BY balance_date";
-$balanceResult = $conn->query($balanceQuery);
-if (!$balanceResult) {
-    die("Error in SQL query: " . $conn->error);
-}
-$balanceData = array();
-while ($row = $balanceResult->fetch_assoc()) {
-    $balanceData[] = $row;
-}
-$balanceDataPoints = array();
-foreach ($balanceData as $row) {
-    $totalIncome = (int)$row['Total_Income'];
-    $after10PercentDeduction = $totalIncome * 0.90; // Deduct 10%
-    $finalAmount = $after10PercentDeduction * 0.40; // 40% of the remaining amount
-    $balanceDataPoints[] = array('date' => $row['balance_date'], 'value' => $totalIncome);
-}
-$balanceDataJson = json_encode($balanceDataPoints);
 
-echo $balanceDataJson;
+
+
+// Account Chart
+$nonPremiumQuery = "SELECT 
+            balance.balance_date,
+            SUM(balance.song_income * 0.90 * 0.40) AS Non_Premium_Income
+        FROM 
+            balance
+        INNER JOIN 
+            songs ON songs.song_isrc = balance.song_isrc
+        WHERE 
+            ((songs.content_isPremium = 'Yes' AND balance.balance_date < songs.content_premiumAt)
+            OR songs.content_isPremium = 'No')
+            AND songs.content_createdBy = '$productionCode'
+        GROUP BY 
+            balance.balance_date";
+
+    $nonPremiumResult = $conn->query($nonPremiumQuery);
+
+    // Query for Premium Songs
+    $premiumQuery = "SELECT 
+            balance.balance_date,
+            SUM(balance.song_income * 0.90 * 0.90) AS Premium_Income
+        FROM 
+            balance
+        INNER JOIN 
+            songs ON songs.song_isrc = balance.song_isrc
+        WHERE 
+            songs.content_isPremium = 'Yes'
+            AND balance.balance_date >= songs.content_premiumAt
+            AND songs.content_createdBy = '$productionCode'
+        GROUP BY 
+            balance.balance_date";
+
+    $premiumResult = $conn->query($premiumQuery);
+
+    if (!$nonPremiumResult || !$premiumResult) {
+        die("Error in SQL query: " . $conn->error);
+    }
+
+    // Combine results
+    $data = array();
+    while ($row = $nonPremiumResult->fetch_assoc()) {
+        $data[$row['balance_date']]['Non_Premium_Income'] = (float)$row['Non_Premium_Income'];
+    }
+
+    while ($row = $premiumResult->fetch_assoc()) {
+        $data[$row['balance_date']]['Premium_Income'] = (float)$row['Premium_Income'];
+    }
+
+    $combinedData = array();
+    foreach ($data as $date => $values) {
+        $combinedData[] = array(
+            'balance_date' => $date,
+            'Non_Premium_Income' => $values['Non_Premium_Income'] ?? 0,
+            'Premium_Income' => $values['Premium_Income'] ?? 0
+        );
+    }
+
+    $npDataJSON = json_encode($combinedData);
+echo "$npDataJSON";
 
 
 
@@ -294,104 +337,43 @@ echo $balanceDataJson;
 
         <div class="col-12 col-xl-12 col-xxl-12 d-flex">
           
-          <div class="col-4 col-xl-4 col-xxl-4 d-flex" style="padding:10px;">
+          <div class="col-6 col-xl-6 col-xxl-6 d-flex" style="padding:10px;">
             <div class="card radius-10 w-100">
               <div id="myChart"></div>
             </div>
           </div>
 
-          <div class="col-4 col-xl-4 col-xxl-4 d-flex" style="padding:10px;">
+          <div class="col-6 col-xl-6 col-xxl-6 d-flex" style="padding:10px;">
             <div class="card radius-10 w-100">
               <div id="highChart" style="background:white;"></div>
             </div>
           </div>
-          <div class="col-4 col-xl-4 col-xxl-4 d-flex" style="padding:10px;">
+        
+        </div>
+
+        <div class="col-12 col-xl-12 col-xxl-12 d-flex">
+          
+          <div class="col-12 col-xl-12 col-xxl-12 d-flex" style="padding:10px;">
             <div class="card radius-10 w-100">
-              <div id="activeUser" style="background:white;"></div>
+              <div id="npDataJSON" style="background:white;"></div>
             </div>
           </div>
+          
+
+
         </div>
 
-<div class="col-12 col-xl-12 col-xxl-12">
-<div id="dashboardNew"></div>
-
-
-</div>
 
 
 
 
-<div class="col-12 col-xl-12 col-xxl-12 d-flex">
-      <div class="card radius-10 w-100" style="background-color: #202a40;color:white">
-        <div class="card-body">
-          <div class="row g-3 align-items-center">
-            <div class="col-9">
-              <h5 class="mb-0">Content Revenue History</h5>
-            </div>
-          </div>
-          <div class="table-responsive mt-4">
-            <table class="table align-middle mb-0 table-hover" id="Transaction-History">
-              <thead class="table-light" >
-                <tr >
-                  <th style="background-color: #12bf24 !important;">Song Title</th>
-                  <th style="background-color: #12bf24 !important;">ISRC</th>
-                  <th style="background-color: #12bf24 !important;">Total Income</th>
-                  <th style="background-color: #12bf24 !important;">Status</th>
-                  <th style="background-color: #12bf24 !important;">Premium</th>
-                  <th style="background-color: #12bf24 !important;">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                
-              
-
-              <?php
-$premiumSongsSql = "SELECT * FROM songs WHERE content_createdBy = '$productionCode'";
-$premiumSongsResult = $conn->query($premiumSongsSql);
-
-while ($row = $premiumSongsResult->fetch_assoc()) {
-?>
-
-<tr style="color:white;">
-    <td>
-        <div class="d-flex align-items-center">
-            <div class="">
-                <img src="../public/uploads/<?php echo $row['content_art'];?>" class="rounded-circle" width="46" height="46" alt="" />
-            </div>
-            <div class="ms-2">
-                <h6 class="mb-1 font-14"><?php echo $row['song_title']; ?></h6>
-                <!-- <p class="mb-0 font-13 text-secondary">Refrence Id #8547846</p> -->
-            </div>
-        </div>
-    </td>
-    <td><?php echo $row['song_isrc']; ?></td>
-    <td>₹0</td>
-    <td>
-            <?php echo $row['content_status']; ?>
-    </td>
-
-    <td>
-            <?php echo $row['content_isPremium']; ?>
-    </td>
-    <td>
-            <?php echo $row['content_createdAt']; ?>
-    </td>
-</tr>
-
-<?php
-}
-?>
 
 
-              
-              
-               
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+
+
+
+
+
 
     <div id="songChart"></div>
 
@@ -499,77 +481,88 @@ Highcharts.chart('highChart', {
 });
 
 
+const chartData = <?php echo $npDataJSON; ?>;
 
-const jsonData = <?php echo $balanceDataJson; ?>
+const dates = [];
+const premiumAmounts = [];
+const nonPremiumAmounts = [];
 
-        // Prepare data for Highcharts
-        const dayWiseData = jsonData.map(item => [new Date(item.date).getTime(), item.value]);
-
-        Highcharts.chart('dashboardNew', {
-
-            chart: {
-                type: 'area',
-                zooming: {
-                    type: 'x'
-                },
-                panning: true,
-                panKey: 'shift',
-                scrollablePlotArea: {
-                    minWidth: 600
-                },
-                backgroundColor: '#FFFFFF' // Set background color to white
-            },
-
+chartData.forEach(row => {
+    dates.push(row.balance_date);
+    premiumAmounts.push(row.Premium_Income);
+    nonPremiumAmounts.push(row.Non_Premium_Income);
+});
+Highcharts.chart('npDataJSON', {
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Income from Premium and Non-Premium Songs',
+            align: 'left'
+        },
+        xAxis: {
+            categories: dates
+        },
+        yAxis: {
             title: {
-                text: 'Revenue Overtime',
-                align: 'left'
+                text: 'Amount'
             },
-
-            credits: {
-                enabled: false
-            },
-
-            xAxis: {
-                type: 'datetime',
-                title: {
-                    text: 'Date'
+            plotLines: [{
+                color: 'black',
+                width: 2,
+                value: 13.5492019749684,
+                animation: {
+                    duration: 1000,
+                    defer: 4000
                 },
-                labels: {
-                    format: '{value:%b %d}' // Format for the date labels
+                label: {
+                    text: 'Max Inflation',
+                    align: 'right',
+                    x: -20
                 }
-            },
-
-            yAxis: {
-                title: {
-                    text: 'Value'
+            }]
+        },
+        plotOptions: {
+            series: {
+                animation: {
+                    duration: 1000
                 },
-                labels: {
-                    format: '{value}'
-                }
-            },
-
-            tooltip: {
-                headerFormat: 'Date: {point.x:%b %d}<br>',
-                pointFormat: 'Value: {point.y}',
-                shared: true
-            },
-
-            legend: {
-                enabled: false
-            },
-
-            series: [{
-                data: dayWiseData,
-                lineColor: Highcharts.getOptions().colors[1],
-                color: Highcharts.getOptions().colors[2],
-                fillOpacity: 0.5,
-                name: 'Daily Data',
                 marker: {
                     enabled: false
                 },
-                threshold: null
+                lineWidth: 2
+            }
+        },
+        series: [{
+            name: 'Non-Premium Amount',
+            data: nonPremiumAmounts,
+            tooltip: {
+                valuePrefix: '$'
+            }
+        }, {
+            name: 'Premium Amount',
+            data: premiumAmounts,
+            tooltip: {
+                valuePrefix: '$'
+            }
+        }],
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    yAxis: [{
+                        tickAmount: 2,
+                        title: {
+                            x: 15,
+                            reserveSpace: false
+                        }
+                    }]
+                }
             }]
-        });
+        }
+    });
 
 
 
@@ -626,16 +619,9 @@ const jsonData = <?php echo $balanceDataJson; ?>
         }
     }]
 });
-
-
-
-
-
-
-
-
 });
 </script>
+
 <?php
 include 'footer.php';
 ?>

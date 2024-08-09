@@ -10,6 +10,7 @@ include 'header.php';
 							<table id="example2" class="table table-striped table-bordered">
 								<thead style="background:black;color:white;text-align:center;">
 									<tr>
+                                        <th></th>
                                         <th>Song Name</th>
                                         <?php
                                         $platformNameList = platFormTable($conn);
@@ -35,6 +36,18 @@ if ($result->num_rows > 0) {
 ?>
 
     <tr style="text-align:center;">
+    <td style="font-weight:700;text-align:left;"> <?php
+    $artPath = '../public/art/' . $row['content_art'];
+    $defaultImagePath = "../public/productionImage/$productionIcon"; // Path to your default image
+
+    // Check if the content_art exists or is null
+    if (!empty($row['content_art']) && file_exists($artPath)) {
+        echo '<img src="' . $artPath . '" style="width:60px;">';
+    } else {
+        echo '<img src="' . $defaultImagePath . '" style="width:60px;">';
+    }
+    ?></td>
+
         <td style="font-weight:700;text-align:left;"><?php echo $row['song_title']; ?></td>
 
         <?php
@@ -43,13 +56,13 @@ if ($result->num_rows > 0) {
         if ($platformResult->num_rows > 0) {
             while ($platformRow = $platformResult->fetch_assoc()) {
                 $platformName = $platformRow['platforms_name'];
-                $platformStatus = "Pending"; // Default status
+                $platformStatus = '<span class="badge bg-danger">Pending</span>';
         
                 $listPlatformSQL = "SELECT * FROM platforms_listed_song WHERE song_id = '$content_unicode' AND platforms_name = '$platformName'";
                 $listPlatformResult = $conn->query($listPlatformSQL);
         
                 if ($listPlatformResult->num_rows > 0) {
-                    $platformStatus = "Approved";
+                    $platformStatus = '<span class="badge bg-success text-dark">Active</span>';
                 }
         
                 //echo "Platform: $platformName, Status: $<br>";

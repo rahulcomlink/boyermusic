@@ -50,11 +50,11 @@ include 'header.php';
 						<div class="table-responsive">
 							<table id="example2" class="table table-striped table-bordered">
 								<thead>
-									<tr>
+									<tr style="background:#263544;color:white;text-align:center;">
 										<th>Platform</th>
                                         <th>Production</th>
                                         <th>Songs Title</th>
-										<th style="background-color:#E3651D;">Income</th>
+										<th style="background-color:#06D001;">Revenue</th>
                                         <th>Month</th>
 									</tr>
 								</thead>
@@ -129,8 +129,14 @@ if ($spotifyResult->num_rows > 0) {
         <td><?php echo $row['platforms_name']; ?></td>
         <td><?php echo $row['original_l2_name']; ?></td>
         <td><?php echo $row['song_title']; ?></td>
-        <td style="background-color:#E3651D; font-weight:700"><?php echo number_format($ProductionIncome, 0);?></td>
-        <td><?php echo $row['balance_date']; ?></td>
+        <td style="background-color:#06D001; font-weight:700;text-align:center;"><?php echo number_format($ProductionIncome, 0);?></td>
+        <td style="text-align:center;">
+    <?php
+    $timestamp = strtotime($row['balance_date']); // Convert to Unix timestamp
+    $formattedDate = date('F, Y', $timestamp); // Format as "October, 2023"
+    echo $formattedDate;
+    ?>
+</td>
     </tr>
 
 <?php

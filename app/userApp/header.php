@@ -96,7 +96,9 @@ if ($productionNameResult) {
 	  <link href="<?php echo getBaseUrl(); ?>/public/assets/plugins/Drag-And-Drop/dist/imageuploadify.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="stylesheet" href="custom.css">
-
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
 
 
 
@@ -204,7 +206,7 @@ if ($productionNameResult) {
 
             <li >
               <a href="javascript:;" class="has-arrow" style="color:white;">
-                <div class="parent-icon"><i class="fa-solid fa-magnifying-glass-chart fa-bounce"></i>
+                <div class="parent-icon"><i class="fa-solid fa-magnifying-glass-chart"></i>
                 </div>
                 <div class="menu-title" style="color:white;font-weight:700">Premium Report</div>
               </a>

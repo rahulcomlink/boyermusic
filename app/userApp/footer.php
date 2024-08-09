@@ -145,8 +145,11 @@
 <!-- Dashboard -->
 <script src="https://code.highcharts.com/dashboards/datagrid.js"></script>
 <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+
 <script src="https://code.highcharts.com/dashboards/dashboards.js"></script>
 <script src="https://code.highcharts.com/dashboards/modules/layout.js"></script>
+
+
 
 
 
